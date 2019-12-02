@@ -34,7 +34,7 @@ public class WeatherController : MonoBehaviour
 	void Start()
     {
 		StartCoroutine(GetWeather(CheckSnowStatus));
-	}
+    }
 
     // Update is called once per frame
     void Update()
@@ -73,7 +73,7 @@ public class WeatherController : MonoBehaviour
 	{
 		using (UnityWebRequest req = UnityWebRequest.Get(String.Format("http://api.openweathermap.org/data/2.5/weather?id={0}&APPID={1}", m_CityId, API_KEY)))
 		{
-			yield return req.Send();
+			yield return req.SendWebRequest();
 			while (!req.isDone)
 				yield return null;
 			byte[] result = req.downloadHandler.data;

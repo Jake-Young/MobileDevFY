@@ -15,6 +15,7 @@ namespace Lean.Touch
         private ARRaycastManager m_SessionOriginRaycast;
         private Pose m_PlacementPose;
         private bool m_PlacementPoseIsValid = false;
+        private Transform m_CloneToBeDeleted = null;
 
         /// <summary>The prefab that this component can spawn.</summary>
         [Tooltip("The prefab that this component can spawn.")]
@@ -36,15 +37,23 @@ namespace Lean.Touch
         /// <summary>This will spawn Prefab at the specified finger based on the ScreenDepth setting.</summary>
         public void Spawn()
 		{
-			if (Prefab != null)
-			{
+            if (Prefab != null)
+            {
+
+                if (m_CloneToBeDeleted != null)
+                {
+                    Destroy(m_CloneToBeDeleted);
+                }
+
 				var clone = Instantiate(Prefab);
 
-				clone.position = m_PlacementPose.position;
+                clone.position = m_PlacementPose.position;
                 clone.rotation = m_PlacementPose.rotation;
 
 				clone.gameObject.SetActive(true);
-			}
+
+                m_CloneToBeDeleted = clone;
+            }
 		}
 
         //public void PlaceObject()
