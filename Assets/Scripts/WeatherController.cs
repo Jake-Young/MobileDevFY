@@ -29,6 +29,7 @@ public class WeatherController : MonoBehaviour
 
 	public string m_CityId;
 	public GameObject m_SnowSystem;
+    public GameObject m_RainSystem;
 
 	// Start is called before the first frame update
 	void Start()
@@ -56,18 +57,6 @@ public class WeatherController : MonoBehaviour
 		else
 			m_SnowSystem.SetActive(false);
 	}
-
-	//private async Task<WeatherInfo> GetWeather()
-	//{
-	//	UnityWebRequest request = UnityWebRequest.Get(String.Format("http://api.openweathermap.org/data/2.5/weather?id={0}&APPID={1}", m_CityId, API_KEY));
-	//	UnityWebRequest response = (UnityWebRequest)(await request.GetResponseAsync());
-	//	StreamReader reader = new StreamReader(response.GetResponseStream());
-	//       // This JSON reader is case sensitive
-	//       string jsonResponse = reader.ReadToEnd();
-	//	WeatherInfo info = JsonUtility.FromJson<WeatherInfo>(jsonResponse);
-	//	return info;
-	//}
-
 
 	IEnumerator GetWeather(Action<WeatherInfo> onSuccess)
 	{

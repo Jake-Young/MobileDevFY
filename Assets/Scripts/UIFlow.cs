@@ -1,7 +1,6 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using TMPro;
 using System.Text.RegularExpressions;
 using Firebase.Auth;
@@ -11,15 +10,12 @@ public class UIFlow : MonoBehaviour
     Regex m_EmailRegex = new Regex(@"(.com)|(.co.uk)\@");
     Regex m_PasswordRegex = new Regex(@"[^*_^%$£#~+=]");
 
-    [SerializeField] private GameObject m_ErrorMesssagePanel;
-    [SerializeField] private TMP_Text m_ErrorMessage;
-    [SerializeField] private TMP_Text m_LoginEmail;
-    [SerializeField] private TMP_Text m_RegisterEmail;
-    [SerializeField] private TMP_InputField m_LoginPassword;
-    [SerializeField] private TMP_InputField m_RegisterPassword;
+    [SerializeField] private GameObject m_MesssagePanel;
+    [SerializeField] private TMP_Text m_Message;
 
     private string m_Password;
     private string m_Email;
+    private string m_StringFormat = "User: {0}";
     private bool m_EmailPass = false;
     private bool m_PasswordPass = false;
 
@@ -34,8 +30,8 @@ public class UIFlow : MonoBehaviour
         } 
         else
         {
-            m_ErrorMessage.text = "Email is not valid";
-            m_ErrorMesssagePanel.SetActive(true);
+            m_Message.text = "Email is not valid";
+            m_MesssagePanel.SetActive(true);
             m_EmailPass = false;
         }
     }
@@ -52,8 +48,8 @@ public class UIFlow : MonoBehaviour
         }
         else
         {
-            m_ErrorMessage.text = "Password is not valid";
-            m_ErrorMesssagePanel.SetActive(true);
+            m_Message.text = "Password is not valid";
+            m_MesssagePanel.SetActive(true);
             m_PasswordPass = false;
         }
     }
@@ -69,20 +65,25 @@ public class UIFlow : MonoBehaviour
         }
         else
         {
-            m_ErrorMessage.text = "Passwords do not match";
-            m_ErrorMesssagePanel.SetActive(true);
+            m_Message.text = "Passwords do not match";
+            m_MesssagePanel.SetActive(true);
             m_PasswordPass = false;
         }
     }
 
     public void DismissErrorMessage()
     {
-        m_ErrorMesssagePanel.SetActive(false);
+        m_MesssagePanel.SetActive(false);
     }
 
     public void LoginButtonClicked()
     {
-        //StartCoroutine(RegisterUser(m_RegisterEmail.text, m_RegisterPassword.text));
+        if (m_EmailPass && m_PasswordPass)
+        {
+            m_EmailPass = false;
+            m_PasswordPass = false;
+            StartCoroutine(SignInUser(m_Email, m_Password));
+        }
     }
 
     public void RegisterButtonClicked()
@@ -110,7 +111,32 @@ public class UIFlow : MonoBehaviour
         else
         {
             Debug.Log($"Successfully registered user {registerTask.Result.Email}");
+            StartCoroutine(LoadAsyncScene(1));
         }
 
+    }
+
+    private IEnumerator SignInUser(string email, string password)
+    {
+        var auth = FirebaseAuth.DefaultInstance;
+        var signInTask = auth.SignInWithEmailAndPasswordAsync(email, password);
+        yield return new WaitUntil(() => signInTask.IsCompleted);
+
+        if (signInTask.Exception != null)
+        {
+            Debug.LogWarning($"Failed to sign in with {signInTask.Exception}");
+        }
+        else
+        {
+            Debug.Log($"Successfully signed in user {signInTask.Result.Email}");
+            StartCoroutine(LoadAsyncScene(1));
+        }
+    }
+
+    private IEnumerator LoadAsyncScene(int sceneIndex)
+    {
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneIndex);
+
+        yield return new WaitUntil(() => asyncLoad.isDone);
     }
 }
