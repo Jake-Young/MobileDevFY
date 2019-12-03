@@ -27,12 +27,14 @@ public class WeatherController : MonoBehaviour
 	private const float API_CHECK_MAXTIME = 10 * 60.0f; //10 minutes
 	private float m_ApiCheckCountdown = API_CHECK_MAXTIME;
 
-	public string m_CityId;
-	public GameObject m_SnowSystem;
+	public string m_LondonCityId;
+    public string m_LosAngelesCityId;
+    public GameObject m_SnowSystem;
     public GameObject m_RainSystem;
+    public GameObject m_CloudSystem;
 
-	// Start is called before the first frame update
-	void Start()
+    // Start is called before the first frame update
+    void Start()
     {
 		StartCoroutine(GetWeather(CheckSnowStatus));
     }
@@ -60,7 +62,7 @@ public class WeatherController : MonoBehaviour
 
 	IEnumerator GetWeather(Action<WeatherInfo> onSuccess)
 	{
-		using (UnityWebRequest req = UnityWebRequest.Get(String.Format("http://api.openweathermap.org/data/2.5/weather?id={0}&APPID={1}", m_CityId, API_KEY)))
+		using (UnityWebRequest req = UnityWebRequest.Get(String.Format("http://api.openweathermap.org/data/2.5/weather?id={0}&APPID={1}", m_LondonCityId, API_KEY)))
 		{
 			yield return req.SendWebRequest();
 			while (!req.isDone)
