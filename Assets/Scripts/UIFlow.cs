@@ -140,8 +140,4 @@ public class UIFlow : MonoBehaviour
         yield return new WaitUntil(() => asyncLoad.isDone);
     }
 
-    private void LoadScene(int sceneIndex)
-    {
-        SceneManager.LoadScene(sceneIndex);
-    }
 }

@@ -26,6 +26,8 @@ public class WeatherController : MonoBehaviour
 	private const string API_KEY = "5690ad6d963e3cf4ab163080864a9a84";
 	private const float API_CHECK_MAXTIME = 10 * 60.0f; //10 minutes
 	private float m_ApiCheckCountdown = API_CHECK_MAXTIME;
+    private bool m_CanCheck = false;
+    private GameObject m_ActiveWeatherSystem;
 
 	public string m_LondonCityId;
     public string m_LosAngelesCityId;
@@ -45,14 +47,26 @@ public class WeatherController : MonoBehaviour
 		m_ApiCheckCountdown -= Time.deltaTime;
 		if (m_ApiCheckCountdown <= 0)
 		{
-			m_ApiCheckCountdown = API_CHECK_MAXTIME;
-			StartCoroutine(GetWeather(CheckSnowStatus));
+            m_ApiCheckCountdown = API_CHECK_MAXTIME;
+            m_CanCheck = true;
 		}
 	}
 
-	public void CheckSnowStatus(WeatherInfo weatherObj)
+    public void OnLondonClick()
+    {
+
+    }
+
+    public void OnLosAngelesClick()
+    {
+
+    }
+
+	public void CheckWeatherStatus(WeatherInfo weatherObj)
 	{
-		bool snowing = weatherObj.weather[0].main.Equals("Clouds");
+		bool snowing = weatherObj.weather[0].main.Equals("Snow");
+        bool clouds = weatherObj.weather[0].main.Equals("Clouds");
+
 		print("MAIN : " + weatherObj.weather[0].main);
 		if (snowing)
 			m_SnowSystem.SetActive(true);
@@ -60,9 +74,9 @@ public class WeatherController : MonoBehaviour
 			m_SnowSystem.SetActive(false);
 	}
 
-	IEnumerator GetWeather(Action<WeatherInfo> onSuccess)
+    IEnumerator GetWeather(Action<WeatherInfo> onSuccess, string cityID)
 	{
-		using (UnityWebRequest req = UnityWebRequest.Get(String.Format("http://api.openweathermap.org/data/2.5/weather?id={0}&APPID={1}", m_LondonCityId, API_KEY)))
+		using (UnityWebRequest req = UnityWebRequest.Get(String.Format("http://api.openweathermap.org/data/2.5/weather?id={0}&APPID={1}", cityID, API_KEY)))
 		{
 			yield return req.SendWebRequest();
 			while (!req.isDone)
@@ -72,5 +86,7 @@ public class WeatherController : MonoBehaviour
 			WeatherInfo info = JsonUtility.FromJson<WeatherInfo>(weatherJSON);
 			onSuccess(info);
 		}
+
+        m_CanCheck = false;
 	}
 }
