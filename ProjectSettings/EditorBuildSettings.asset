@@ -5,6 +5,7 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
+<<<<<<< HEAD
   - enabled: 0
     path: Assets/Scenes/SpikeARFunc.unity
     guid: 76af9b39e737f624bb7252624ccfc7b4
@@ -24,8 +25,14 @@ EditorBuildSettings:
     path: Assets/Scenes/FinalScenes/ARWeatherGame.unity
     guid: 152bc948447023c418c2125e9f098ae9
   - enabled: 0
+=======
+  - enabled: 1
+>>>>>>> development
     path: Assets/Scenes/FinalScenes/RegistrationLogin.unity
     guid: 71b551ac6c80b434ab6c973652d50e9a
+  - enabled: 1
+    path: Assets/Scenes/FinalScenes/ARWeatherGame.unity
+    guid: 152bc948447023c418c2125e9f098ae9
   m_configObjects:
     com.unity.xr.arcore.PlayerSettings: {fileID: 11400000, guid: 7177fe744f670744bb1cd196576ae931,
       type: 2}
