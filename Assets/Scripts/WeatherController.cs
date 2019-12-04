@@ -40,9 +40,11 @@ public class WeatherController : MonoBehaviour
 {
 
 	private const string API_KEY = "5690ad6d963e3cf4ab163080864a9a84";
-	private const float API_CHECK_MAXTIME = 10 * 60.0f; //10 minutes
-	private float m_ApiCheckCountdown = API_CHECK_MAXTIME;
-    private bool m_CanCheck = false;
+    private const string API_URL_ID = "http://api.openweathermap.org/data/2.5/weather?id={0}&APPID={1}";
+    private const string API_URL_CITY_NAME = "http://api.openweathermap.org/data/2.5/weather?q={0}&APPID={1}";
+    private const float API_CHECK_MAXTIME = 10 * 60.0f; //10 minutes
+	//private float m_ApiCheckCountdown = API_CHECK_MAXTIME;
+ //   private bool m_CanCheck = false;
     private GameObject m_ActiveWeatherSystem;
 
 	public string m_LondonCityId;
@@ -54,14 +56,11 @@ public class WeatherController : MonoBehaviour
     public TMP_Text m_WeatherLabel;
     public TMP_Text m_LocationLabel;
 
-    // Start is called before the first frame update
     void Start()
     {
-        //m_CanCheck = true;
-        StartCoroutine(GetWeatherOfPlayer(CheckLocation));
+        StartCoroutine(GetLocationOfPlayer(CheckLocation));
     }
 
-    // Update is called once per frame
     void Update()
     {
 		//m_ApiCheckCountdown -= Time.deltaTime;
@@ -74,27 +73,26 @@ public class WeatherController : MonoBehaviour
 
     public void OnMyLocationClick()
     {
-       
+        StartCoroutine(GetLocationOfPlayer(CheckLocation));
     }
 
     public void OnLondonClick()
     {
         UpdateLocationLabel("London");
-        StartCoroutine(GetWeatherByID(CheckWeatherStatus, m_LondonCityId));
-
+        StartCoroutine(GetWeatherByID(CheckWeatherStatus, API_URL_ID, m_LondonCityId));
     }
 
     public void OnLosAngelesClick()
     {
         UpdateLocationLabel("Los Angeles");
-        StartCoroutine(GetWeatherByID(CheckWeatherStatus, m_LosAngelesCityId));
+        StartCoroutine(GetWeatherByID(CheckWeatherStatus, API_URL_ID, m_LosAngelesCityId));
     }
 
     public void CheckLocation(IPLocationInfo locationInfo)
     {
         string city = locationInfo.location.city;
-
-        Debug.Log($"Location: {city}");
+        UpdateLocationLabel(city);
+        StartCoroutine(GetWeatherByID(CheckWeatherStatus, API_URL_CITY_NAME, city));
     }
 
 	public void CheckWeatherStatus(WeatherInfo weatherObj)
@@ -105,7 +103,7 @@ public class WeatherController : MonoBehaviour
         bool clear = weatherObj.weather[0].main.Equals("Clear");
         bool clouds = weatherObj.weather[0].main.Equals("Clouds");
 
-        print("MAIN : " + weatherObj.weather[0].main);
+        //print("MAIN : " + weatherObj.weather[0].main);
         if (clear)
         {
             if (m_ActiveWeatherSystem != null && m_ActiveWeatherSystem.name != m_ClearSkySystem.name) 
@@ -158,9 +156,8 @@ public class WeatherController : MonoBehaviour
         m_LocationLabel.text = string.Format("Location: {0}", location);
     }
 
-    IEnumerator GetWeatherOfPlayer(Action<IPLocationInfo> onSuccess)
+    IEnumerator GetLocationOfPlayer(Action<IPLocationInfo> onSuccess)
     {
-        //var ip = NetworkManager.singleton.networkAddress;
         string ipv6 = IPManager.GetIP(ADDRESSFAM.IPv6);
 
         using (UnityWebRequest req = UnityWebRequest.Get(string.Format("https://geo.ipify.org/api/v1?apiKey=at_PsOE0ZNe1iwY5izVDMaUXPNT1rkVQ&ipAddress=", ipv6)))
@@ -172,15 +169,15 @@ public class WeatherController : MonoBehaviour
             }
             byte[] result = req.downloadHandler.data;
             string locationJSON = System.Text.Encoding.Default.GetString(result);
-            Debug.Log(locationJSON);
+            //Debug.Log(locationJSON);
             IPLocationInfo info = JsonUtility.FromJson<IPLocationInfo>(locationJSON);
             onSuccess(info);
         }
     }
 
-    IEnumerator GetWeatherByID(Action<WeatherInfo> onSuccess, string cityID)
+    IEnumerator GetWeatherByID(Action<WeatherInfo> onSuccess, string apiUrl, string cityID)
 	{
-		using (UnityWebRequest req = UnityWebRequest.Get(string.Format("http://api.openweathermap.org/data/2.5/weather?id={0}&APPID={1}", cityID, API_KEY)))
+		using (UnityWebRequest req = UnityWebRequest.Get(string.Format(apiUrl, cityID, API_KEY)))
 		{
 			yield return req.SendWebRequest();
 			while (!req.isDone)
@@ -189,7 +186,7 @@ public class WeatherController : MonoBehaviour
             }
 			byte[] result = req.downloadHandler.data;
 			string weatherJSON = System.Text.Encoding.Default.GetString(result);
-            Debug.Log(weatherJSON);
+            //Debug.Log(weatherJSON);
             WeatherInfo info = JsonUtility.FromJson<WeatherInfo>(weatherJSON);
 			onSuccess(info);
 		}
